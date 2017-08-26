@@ -17,7 +17,9 @@ namespace SpotConsole
             localAPI = new SpotifyLocalAPI();
             localAPI.ListenForEvents = true;
 
-            while (!SpotifyLocalAPI.IsSpotifyRunning() || !SpotifyLocalAPI.IsSpotifyWebHelperRunning())
+            Console.WriteLine(SpotifyLocalAPI.IsSpotifyRunning());
+
+            while (!SpotifyLocalAPI.IsSpotifyRunning() && !SpotifyLocalAPI.IsSpotifyWebHelperRunning())
             {
                 Console.WriteLine("Checking connection readiness...");
                 if (!SpotifyLocalAPI.IsSpotifyRunning())    //Make sure the spotify client is running
@@ -28,8 +30,6 @@ namespace SpotConsole
                                 
                 }
 
-                //System.Threading.Thread.Sleep(3000);    //Wait so connection will pass through.
-
                 if (!SpotifyLocalAPI.IsSpotifyWebHelperRunning())   //Make sure the spotify web helper is running
                 {
                     Console.WriteLine("No Spotify Web Helper instance was found.\nAttempting to start Spotify Web Helper...");
@@ -37,9 +37,6 @@ namespace SpotConsole
                     while (!SpotifyLocalAPI.IsSpotifyWebHelperRunning()) { }    //Checks until the process is started.
                 }
             }
-
-
-
 
             if (!localAPI.Connect())
             {
