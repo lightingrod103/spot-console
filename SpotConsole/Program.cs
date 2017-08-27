@@ -3,6 +3,7 @@ using SpotifyAPI.Local.Enums;
 using SpotifyAPI.Local.Models;
 using System;
 using System.Speech.Recognition;
+using System.Speech.Synthesis;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,22 +18,14 @@ namespace SpotConsole
         
         static void Main(string[] args)
         {
-            localAPI = new SpotifyLocalAPI();
-            localAPI.ListenForEvents = true;
+            localAPI = new SpotifyLocalAPI()
+            {
+                ListenForEvents = true
+            };
 
-            SpeechRecognitionEngine sre = new SpeechRecognitionEngine();
-            sre.SetInputToDefaultAudioDevice();
+            
 
-            Choices assets = new Choices();
-            assets.Add(new string[] {"artist", "album", "what song is playing", "what song is this", "play", "pause", "exit" });
-
-            GrammarBuilder gb = new GrammarBuilder();
-            gb.Append(assets);
-
-            // Create the Grammar instance.
-            Grammar g = new Grammar(gb);
-
-            sre.LoadGrammar(g);
+            
 
             Console.WriteLine("Initializing application...");
             while (!SpotifyLocalAPI.IsSpotifyRunning() || !SpotifyLocalAPI.IsSpotifyWebHelperRunning())
@@ -96,6 +89,7 @@ namespace SpotConsole
                 {
                     looping = false;
                     Console.WriteLine("Exiting recognition loop...");
+                    ss.Speak("Exiting recognition loop");
                     sre.Dispose();
                     
                 } else
