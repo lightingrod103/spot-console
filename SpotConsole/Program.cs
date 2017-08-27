@@ -2,6 +2,8 @@
 using SpotifyAPI.Local.Enums;
 using SpotifyAPI.Local.Models;
 using System;
+using System.Speech.Recognition;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,10 +14,25 @@ namespace SpotConsole
     class Program
     {
         private static SpotifyLocalAPI localAPI;
+        
         static void Main(string[] args)
         {
             localAPI = new SpotifyLocalAPI();
             localAPI.ListenForEvents = true;
+
+            SpeechRecognitionEngine sre = new SpeechRecognitionEngine();
+            sre.SetInputToDefaultAudioDevice();
+
+            Choices assets = new Choices();
+            assets.Add(new string[] { "song", "artist", "album" });
+
+            GrammarBuilder gb = new GrammarBuilder();
+            gb.Append(assets);
+
+            // Create the Grammar instance.
+            Grammar g = new Grammar(gb);
+
+            sre.LoadGrammar(g);
 
             Console.WriteLine("Initializing application...");
             while (!SpotifyLocalAPI.IsSpotifyRunning() || !SpotifyLocalAPI.IsSpotifyWebHelperRunning())
@@ -59,20 +76,34 @@ namespace SpotConsole
 
             Console.Clear();
 
-            Console.WriteLine("Welcome to the Spotify Local API Console Application. Enter \"Help\" for help, or begin entering commands.");
+            //Console.WriteLine("Welcome to the Spotify Local API Console Application. Enter \"Help\" for help, or begin entering commands.
+
+            sre.SpeechRecognized +=
+                new EventHandler<SpeechRecognizedEventArgs>(sre_SpeechRecognized);
 
 
 
+            sre.Recognize();
 
-
-
-
-            Console.WriteLine("Press enter to pause spotify.");
-            Console.ReadLine();
-            localAPI.Pause();
+            void sre_SpeechRecognized(object sender, SpeechRecognizedEventArgs e)
+            {
+                Console.WriteLine("Speech recognized: " + e.Result.Text);
+            }
 
             Console.WriteLine("End run.");
             Console.ReadLine();
         }
+
+        public static void CompleteAction(string action)
+        {
+            switch (action)
+            {
+                case "play_music":
+                    localAPI.Play();
+                    break;
+            }
+        }
+
+        
     }
 }
