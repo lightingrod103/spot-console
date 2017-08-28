@@ -15,17 +15,15 @@ namespace SpotConsole
     class Program
     {
         private static SpotifyLocalAPI localAPI;
-        
+        private static SpeechEngine se; 
+
         static void Main(string[] args)
         {
             localAPI = new SpotifyLocalAPI()
             {
                 ListenForEvents = true
             };
-
-            
-
-            
+            se = new SpeechEngine();
 
             Console.WriteLine("Initializing application...");
             while (!SpotifyLocalAPI.IsSpotifyRunning() || !SpotifyLocalAPI.IsSpotifyWebHelperRunning())
@@ -69,41 +67,9 @@ namespace SpotConsole
 
             Console.Clear();
 
-            //Console.WriteLine("Welcome to the Spotify Local API Console Application. Enter \"Help\" for help, or begin entering commands.
-
-            sre.SpeechRecognized += new EventHandler<SpeechRecognizedEventArgs>(sre_SpeechRecognized);
-            sre.SpeechRecognitionRejected += new EventHandler<SpeechRecognitionRejectedEventArgs>(sre_SpeechRejected);
-
-            bool looping = true;
-
-            while (looping)
-            {
-                sre.Recognize();
-            }
-
+            Console.WriteLine("Welcome to the Spotify Local API Console Application. Enter \"Help\" for help, or begin saying commands.");
             
-
-            void sre_SpeechRecognized(object sender, SpeechRecognizedEventArgs e)
-            {
-                if (e.Result.Text.Equals("exit"))
-                {
-                    looping = false;
-                    Console.WriteLine("Exiting recognition loop...");
-                    ss.Speak("Exiting recognition loop");
-                    sre.Dispose();
-                    
-                } else
-                {
-                    Console.WriteLine("Speech recognized: " + e.Result.Text);
-                    CompleteAction(e.Result.Text);
-                }
-                
-            }
-
-            void sre_SpeechRejected(object sender, SpeechRecognitionRejectedEventArgs e)
-            {
-                Console.WriteLine("Speech not recognized. Please try again.");
-            }
+            se.StartLoopListen();
 
             Console.WriteLine("End run.");
             Console.ReadLine();
@@ -117,31 +83,31 @@ namespace SpotConsole
                 case "what song is this":    
                     if (localAPI.GetStatus().Playing)
                     {
-                        Console.WriteLine("Currently playing " + localAPI.GetStatus().Track.TrackResource.Name + " by " + localAPI.GetStatus().Track.ArtistResource.Name);
+                        se.Speak("Currently playing " + localAPI.GetStatus().Track.TrackResource.Name + " by " + localAPI.GetStatus().Track.ArtistResource.Name);
                     } else
                     {
-                        Console.WriteLine("Spotify is currently paused.");
+                        se.Speak("Spotify is currently paused.");
                     }
                     break;
                 case "play":
                     if (!localAPI.GetStatus().Playing)
                     {
-                        Console.WriteLine("Playing...");
+                        se.Speak("Playing...");
                         localAPI.Play();
                     } else
                     {
-                        Console.WriteLine("Spotify is already playing.");
+                        se.Speak("Spotify is already playing.");
                     }
                     break;
                 case "pause":
                     if (localAPI.GetStatus().Playing)
                     {
-                        Console.WriteLine("Pausing Spotify...");
+                        se.Speak("Pausing Spotify...");
                         localAPI.Pause();
                     }
                     else
                     {
-                        Console.WriteLine("Spotify is already paused.");
+                        se.Speak("Spotify is already paused.");
                     }
                     break;
 

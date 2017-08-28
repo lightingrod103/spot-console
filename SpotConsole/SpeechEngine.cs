@@ -10,21 +10,22 @@ namespace SpotConsole
 {
     class SpeechEngine
     {
+        SpeechRecognitionEngine sre = new SpeechRecognitionEngine();
+        SpeechSynthesizer ss = new SpeechSynthesizer();
+
         public SpeechEngine()
         {
-            SpeechRecognitionEngine sre = new SpeechRecognitionEngine();
             sre.SetInputToDefaultAudioDevice();
-            BuildLoadGrammars(sre);
+            BuildLoadGrammars();
             
-            SpeechSynthesizer ss = new SpeechSynthesizer();
             ss.SetOutputToDefaultAudioDevice();
             ss.SelectVoiceByHints(VoiceGender.Female);
         }
 
-        public void BuildLoadGrammars(SpeechRecognitionEngine sre)
+        private void BuildLoadGrammars()
         {
             Choices assets = new Choices();
-            assets.Add(new string[] { "artist", "album", "what song is playing", "what song is this", "play", "pause", "exit" });
+            assets.Add(new string[] { "what song is playing", "what song is this", "play", "pause", "exit" });
 
             GrammarBuilder gb = new GrammarBuilder();
             gb.Append(assets);
@@ -34,7 +35,7 @@ namespace SpotConsole
             sre.LoadGrammar(g);
         }
 
-        public void Listen(SpeechRecognitionEngine sre)
+        public void StartLoopListen()
         {
             bool looping = true;
 
@@ -51,22 +52,28 @@ namespace SpotConsole
                 if (e.Result.Text.Equals("exit"))
                 {
                     looping = false;
-                    Console.WriteLine("Exiting recognition loop...");
-                    //ss.Speak("Exiting recognition loop");                                             TODO: Add synthesis.
-                    sre.Dispose();
                 }
                 else
                 {
-                    Console.WriteLine("Speech recognized: " + e.Result.Text);
                     Program.CompleteAction(e.Result.Text);
                 }
-
             }
 
             void sre_SpeechRejected(object sender, SpeechRecognitionRejectedEventArgs e)
             {
-                Console.WriteLine("Speech not recognized. Please try again.");
+                ss.Speak("Speech not recognized. Please try again.");
             }
+        }
+
+        public void StopLoopListen()
+        {
+            ss.Speak("Exiting recognition loop.");
+            sre.Dispose();
+        }
+
+        public void Speak(String text)
+        {
+            ss.Speak(text);
         }
     }
 }
